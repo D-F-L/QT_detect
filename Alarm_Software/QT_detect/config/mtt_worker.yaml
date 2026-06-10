@@ -1,0 +1,36 @@
+server:
+  host: 127.0.0.1
+  port: 18888
+
+runtime:
+  device: cpu
+  include_array_data: true
+
+logging:
+  file: logs/mtt_worker.log
+  level: info
+
+model:
+  path: work_dir/yolo_4feat_deepnoise_log_randomh_613_moremorexianpu_snrr0.05/yolo_deepDenoiser_20_240.pth
+  processor_module: DOA_stream_realtime_cluster_socket
+
+algorithm:
+  process_window: 240.0
+  process_hop: 20.0
+  raw_buffer_seconds: 260.0
+  stft_win_seconds: 20.0
+  stft_hop_seconds: 1.0
+  doa_delay: 5.0
+  doa_win_len: 10.0
+  doa_mode: center
+  frequency_resolution: 20
+  f_lower_bound: 0.0
+  f_higher_bound: 400.0
+  denoise_thresh: 0.1
+  line_channel: 0
+  spec_freq_div: 20.0
+  add_f_lower_bound: false
+  track_match_max_dt: 240.0
+  track_match_max_df: 1.0
+  analysis_window: 1200.0
+  debug_dir:

@@ -1,0 +1,30 @@
+[INFO] Loading model from work_dir/yolo_4feat_deepnoise_log_randomh_613_moremorexianpu_snrr0.05/yolo_deepDenoiser_20_240.pth...
+Transferred 357/443 items from pretrained weights
+[INFO] Model loaded successfully
+[INFO] All initialization complete
+[INFO] Starting TCP server on 0.0.0.0:18888...
+[INFO] Waiting for client connection...
+[INFO] Client connected from ('127.0.0.1', 59867)
+[INFO] Received first packet, fs=5000
+sec 20
+sec 40
+sec 60
+[Multi] Done! 共提取 21 条独立线谱
+[PROCESS] window=[0.0,80.0) points=414 total=0.77s (STFT=0.06s denoise=0.58s extract=0.05s associate=0.00s)
+  [DOA] processed=414 points, total=0.146s, avg=0.35ms/point
+[CLUSTER] time=80.0s tracks=21 valid=13 clusters=0 pairs=0/0 total=0.94s (DOA=0.15s cluster=0.02s)
+sec 80
+[Multi] Done! 共提取 31 条独立线谱
+[PROCESS] window=[0.0,100.0) points=460 total=0.83s (STFT=0.03s denoise=0.64s extract=0.06s associate=0.00s)
+  [DOA] processed=460 points, total=0.131s, avg=0.29ms/point
+[CLUSTER] time=100.0s tracks=31 valid=11 clusters=0 pairs=0/0 total=1.00s (DOA=0.13s cluster=0.03s)
+
+[ERROR] TCP connection closed
+[INFO] stream summary image saved to: stream_output/tcp_realtime_cluster_result_stream_summary.png
+[INFO] accumulated matrices image saved to: stream_output/tcp_realtime_cluster_result_accumulated_matrices.png
+[INFO] time-azimuth image saved to: stream_output/tcp_realtime_cluster_result_accumulated_matrices_time_azimuth.png
+[INFO] matrices saved as TXT files
+[INFO] stream processing finished.
+[INFO] total processing time: 100.83s
+[INFO] result saved to: stream_output/tcp_realtime_cluster_result.txt
+[INFO] total doa results: 874

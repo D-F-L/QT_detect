@@ -1,0 +1,15 @@
+[INFO] mtt_api.worker_tcp listening on 127.0.0.1:18990
+[INFO] project_root=E:\work\MarineTargetTracker\projects\QT_detect processor=DOA_stream_realtime_cluster_socket device=cpu
+[INFO] client connected: 127.0.0.1:51505
+[INFO] client disconnected: 127.0.0.1:51505
+[INFO] client connected: 127.0.0.1:53917
+Transferred 357/443 items from pretrained weights
+[Multi] Done! 共提取 21 条独立线谱
+[PROCESS] window=[0.0,80.0) points=414 total=0.60s (STFT=0.04s denoise=0.50s extract=0.04s associate=0.00s)
+  [DOA] processed=414 points, total=0.137s, avg=0.33ms/point
+[CLUSTER] time=80.0s tracks=21 valid=13 clusters=0 pairs=0/0 total=0.76s (DOA=0.14s cluster=0.02s)
+[Multi] Done! 共提取 31 条独立线谱
+[PROCESS] window=[0.0,100.0) points=460 total=0.71s (STFT=0.03s denoise=0.60s extract=0.05s associate=0.00s)
+  [DOA] processed=460 points, total=0.128s, avg=0.28ms/point
+[CLUSTER] time=100.0s tracks=31 valid=11 clusters=0 pairs=0/0 total=0.86s (DOA=0.13s cluster=0.03s)
+[INFO] client disconnected: 127.0.0.1:53917

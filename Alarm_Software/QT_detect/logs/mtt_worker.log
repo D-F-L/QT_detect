@@ -1,0 +1,11 @@
+2026-05-29 20:52:22 [INFO ] __main__: mtt_api.worker_tcp listening on 127.0.0.1:18888
+2026-05-29 20:52:22 [INFO ] __main__: project_root=E:\DLF\DeskTop\jiuzhou_spec\Alarm_Software\QT_detect  processor=DOA_stream_realtime_cluster_socket  device=cpu
+2026-05-29 20:52:22 [INFO ] __main__: algorithm: process_window=240.0 process_hop=20.0 freq=[0.0,400.0] denoise_thresh=0.1
+2026-05-29 20:52:22 [INFO ] __main__: config file: E:\DLF\DeskTop\jiuzhou_spec\Alarm_Software\QT_detect\config\mtt_worker.yaml
+2026-05-29 20:52:22 [INFO ] __main__: log file: E:\DLF\DeskTop\jiuzhou_spec\Alarm_Software\QT_detect\logs\mtt_worker.log
+2026-05-29 20:56:30 [INFO ] __main__: mtt_api.worker_tcp listening on 127.0.0.1:18888
+2026-05-29 20:56:30 [INFO ] __main__: project_root=E:\DLF\DeskTop\jiuzhou_spec\Alarm_Software\QT_detect  processor=DOA_stream_realtime_cluster_socket  device=cpu
+2026-05-29 20:56:30 [INFO ] __main__: algorithm: process_window=240.0 process_hop=20.0 freq=[0.0,400.0] denoise_thresh=0.1
+2026-05-29 20:56:30 [INFO ] __main__: config file: E:\DLF\DeskTop\jiuzhou_spec\Alarm_Software\QT_detect\config\mtt_worker.yaml
+2026-05-29 20:56:30 [INFO ] __main__: log file: E:\DLF\DeskTop\jiuzhou_spec\Alarm_Software\QT_detect\logs\mtt_worker.log
+2026-05-29 20:56:42 [INFO ] __main__: interrupted, shutting down

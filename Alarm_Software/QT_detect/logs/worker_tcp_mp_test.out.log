@@ -1,0 +1,7 @@
+[INFO] mtt_api.worker_tcp listening on 127.0.0.1:18991
+[INFO] project_root=E:\work\MarineTargetTracker\projects\QT_detect processor=DOA_stream_realtime_cluster_socket device=cpu
+[INFO] client connected: 127.0.0.1:55948
+[INFO] client disconnected: 127.0.0.1:55948
+[INFO] client connected: 127.0.0.1:55949
+Transferred 357/443 items from pretrained weights
+[INFO] client disconnected: 127.0.0.1:55949

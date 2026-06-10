@@ -1,0 +1,239 @@
+{
+  "buoy_id": "demo-buoy",
+  "start_time": 70.0,
+  "end_time": 89.0,
+  "relative_start_time": 70.0,
+  "relative_end_time": 89.0,
+  "idae": {
+    "freq_axis": [
+      0.0,
+      0.05,
+      0.1,
+      0.15,
+      0.2,
+      0.25,
+      0.3,
+      0.35,
+      0.4,
+      0.45
+    ],
+    "time_axis": [
+      70.0,
+      71.0,
+      72.0,
+      73.0,
+      74.0,
+      75.0,
+      76.0,
+      77.0,
+      78.0,
+      79.0
+    ],
+    "rows": 2001,
+    "cols": 20,
+    "power_db": {
+      "shape": [
+        40020
+      ],
+      "dtype": "float32",
+      "data": null,
+      "order": "C"
+    },
+    "doa_matrix": {
+      "shape": [
+        40020
+      ],
+      "dtype": "float32",
+      "data": null,
+      "order": "C"
+    },
+    "noisy_spec": {
+      "shape": [
+        20,
+        2001
+      ],
+      "dtype": "float32",
+      "data": null,
+      "order": "C"
+    },
+    "denoise_spec": {
+      "shape": [
+        20,
+        2001
+      ],
+      "dtype": "float32",
+      "data": null,
+      "order": "C"
+    },
+    "time_azimuth": {
+      "shape": [
+        20,
+        360
+      ],
+      "dtype": "float32",
+      "data": null,
+      "order": "C"
+    },
+    "line_points": [
+      {
+        "track_id": 1,
+        "time": 70.0,
+        "frequency": 0.25,
+        "doa": 17.25
+      },
+      {
+        "track_id": 2,
+        "time": 70.0,
+        "frequency": 6.45,
+        "doa": 152.75
+      },
+      {
+        "track_id": 3,
+        "time": 70.0,
+        "frequency": 9.7,
+        "doa": 147.75
+      },
+      {
+        "track_id": 4,
+        "time": 70.0,
+        "frequency": 11.3,
+        "doa": 313.75
+      },
+      {
+        "track_id": 5,
+        "time": 70.0,
+        "frequency": 12.9,
+        "doa": 152.75
+      },
+      {
+        "track_id": 6,
+        "time": 70.0,
+        "frequency": 14.55,
+        "doa": 139.25
+      },
+      {
+        "track_id": 14,
+        "time": 70.0,
+        "frequency": 17.8,
+        "doa": 157.25
+      },
+      {
+        "track_id": 7,
+        "time": 70.0,
+        "frequency": 19.35,
+        "doa": 290.75
+      }
+    ],
+    "trajectories": [
+      {
+        "track_id": 1,
+        "times": [
+          70.0,
+          71.0,
+          72.0,
+          73.0,
+          74.0,
+          75.0,
+          76.0,
+          77.0
+        ],
+        "frequencies": [
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25,
+          0.25
+        ],
+        "doas": [
+          17.25,
+          211.25,
+          155.75,
+          134.75,
+          249.25,
+          119.25,
+          74.75,
+          347.25
+        ]
+      },
+      {
+        "track_id": 2,
+        "times": [
+          70.0,
+          71.0,
+          72.0,
+          73.0,
+          74.0,
+          75.0,
+          76.0,
+          77.0
+        ],
+        "frequencies": [
+          6.45,
+          6.45,
+          6.45,
+          6.45,
+          6.45,
+          6.45,
+          6.45,
+          6.45
+        ],
+        "doas": [
+          152.75,
+          90.25,
+          301.75,
+          293.75,
+          292.75,
+          286.75,
+          264.25,
+          267.25
+        ]
+      },
+      {
+        "track_id": 3,
+        "times": [
+          70.0,
+          71.0,
+          72.0,
+          73.0,
+          74.0,
+          75.0,
+          76.0,
+          77.0
+        ],
+        "frequencies": [
+          9.7,
+          9.7,
+          9.7,
+          9.7,
+          9.7,
+          9.7,
+          9.7,
+          9.65
+        ],
+        "doas": [
+          147.75,
+          148.25,
+          146.75,
+          142.75,
+          125.25,
+          96.75,
+          78.25,
+          66.75
+        ]
+      }
+    ]
+  },
+  "recognition": {
+    "segments": [
+      {
+        "start_time": 1748000070.0,
+        "end_time": 1748000089.0,
+        "label": 1,
+        "probability": 1.0
+      }
+    ]
+  }
+}
