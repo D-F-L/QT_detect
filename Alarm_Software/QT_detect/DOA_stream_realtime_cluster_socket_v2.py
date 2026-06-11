@@ -89,44 +89,43 @@ def circular_mean_deg(angles_deg):
 
 
 def circular_smooth_deg(angles_deg, win=5):
-    """对DOA做滑动圆周平滑（向量化版本，与逐点版本行为一致）"""
+    """对DOA做滑动圆周平滑"""
     x = np.asarray(angles_deg, dtype=float)
     n = len(x)
     if n == 0 or win <= 1:
         return x.copy()
     half = win // 2
-    ang = np.deg2rad(x)
-    s = np.sin(ang)
-    c = np.cos(ang)
-
-    # 累加和实现滑动均值，边界处自动缩小窗口
-    cs = np.concatenate([[0], np.cumsum(s)])
-    cc = np.concatenate([[0], np.cumsum(c)])
-
-    indices = np.arange(n)
-    lefts = np.maximum(0, indices - half)
-    rights = np.minimum(n, indices + half + 1)
-    counts = (rights - lefts).astype(float)
-
-    s_mean = (cs[rights] - cs[lefts]) / counts
-    c_mean = (cc[rights] - cc[lefts]) / counts
-
-    return np.rad2deg(np.arctan2(s_mean, c_mean)) % 360.0
+    out = np.zeros(n, dtype=float)
+    for i in range(n):
+        l = max(0, i - half)
+        r = min(n, i + half + 1)
+        out[i] = circular_mean_deg(x[l:r])
+    return out
 
 
 def remove_doa_outliers(angles_deg, win=5, thr=20.0, max_iter=2):
-    """迭代式局部异常点检测（向量化版本）"""
+    """迭代式局部异常点检测"""
     x = np.asarray(angles_deg, dtype=float).copy()
     n = len(x)
     if n == 0:
         return x
+    half = win // 2
     for _ in range(max_iter):
-        smoothed = circular_smooth_deg(x, win=win)
-        diffs = angular_diff_deg(x, smoothed)
-        outliers = diffs > thr
-        if not np.any(outliers):
+        changed = False
+        for i in range(n):
+            l = max(0, i - half)
+            r = min(n, i + half + 1)
+            neighborhood = x[l:r]
+            neighborhood = neighborhood[np.isfinite(neighborhood)]
+            if len(neighborhood) < 2:
+                continue
+            local_mean = circular_mean_deg(neighborhood)
+            diff = angular_diff_deg(x[i], local_mean)
+            if diff > thr:
+                x[i] = local_mean
+                changed = True
+        if not changed:
             break
-        x[outliers] = smoothed[outliers]
     return x
 
 
@@ -340,7 +339,6 @@ def vector_doa_batch(pt_buffer, vx_buffer, vy_buffer, fs, buffer_start_time,
     vy_buffer = vy_buffer / (np.abs(vy_buffer).max() + 1e-10)
 
     current_time = buffer_start_time + len(pt_buffer) / fs
-
     nfft = int(win_len * fs)
     half_nfft = nfft // 2
 
@@ -378,6 +376,7 @@ def vector_doa_batch(pt_buffer, vx_buffer, vy_buffer, fs, buffer_start_time,
 
     # 对每个时间窗口批量处理
     for (start_idx, end_idx), freq_list in time_groups.items():
+        # 提取信号段并转换为torch（已做buffer级归一化）
         p = torch.from_numpy(pt_buffer[start_idx:end_idx]).float().to(device)
         x = torch.from_numpy(vx_buffer[start_idx:end_idx]).float().to(device)
         y = torch.from_numpy(vy_buffer[start_idx:end_idx]).float().to(device)
@@ -385,9 +384,9 @@ def vector_doa_batch(pt_buffer, vx_buffer, vy_buffer, fs, buffer_start_time,
         sig_len = len(p)
         win = torch.from_numpy(np.hanning(sig_len)).float().to(device)
 
-        # 批量FFT（rfft 利用实数对称性，约快2倍）
+        # 批量FFT
         signals = torch.stack([p * win, x * win, y * win])
-        ffts = torch.fft.rfft(signals, n=nfft, dim=1) / sig_len
+        ffts = torch.fft.fft(signals, n=nfft, dim=1) / sig_len
 
         # 对每个频率点计算DOA
         for idx, target_freq in freq_list:
@@ -466,9 +465,6 @@ def vector_doa_one_point(pt_buffer, vx_buffer, vy_buffer, fs, buffer_start_time,
 
     current_time = buffer_start_time + len(pt_buffer) / fs
 
-    nfft = int(win_len * fs)
-    half_nfft = nfft // 2
-
     if mode == 'center':
         t1 = target_time - win_len / 2.0
         t2 = target_time + win_len / 2.0
@@ -493,7 +489,7 @@ def vector_doa_one_point(pt_buffer, vx_buffer, vy_buffer, fs, buffer_start_time,
     if sig_len < int(win_len * fs * 0.9):
         return None
 
-    # 转换为torch张量
+    # 转换为torch张量（已做buffer级归一化）
     t0 = time.time()
     p = torch.from_numpy(pt_buffer[start_idx:end_idx]).float().to(device)
     x = torch.from_numpy(vx_buffer[start_idx:end_idx]).float().to(device)
@@ -501,16 +497,19 @@ def vector_doa_one_point(pt_buffer, vx_buffer, vy_buffer, fs, buffer_start_time,
     time_to_tensor = time.time() - t0
 
     sig_len = len(p)
+    nfft = int(win_len * fs)
 
     t2 = time.time()
     win = torch.from_numpy(np.hanning(sig_len)).float().to(device)
     time_window = time.time() - t2
 
-    # FFT批量处理（rfft）
+    # FFT批量处理
     t3 = time.time()
     signals = torch.stack([p * win, x * win, y * win])
-    ffts = torch.fft.rfft(signals, n=nfft, dim=1) / sig_len
+    ffts = torch.fft.fft(signals, n=nfft, dim=1) / sig_len
     time_fft = time.time() - t3
+
+    half_nfft = nfft // 2
 
     def matlab_round_pos(v):
         return int(np.floor(v + 0.5))
@@ -632,7 +631,7 @@ class RealtimeClusterAnalyzer:
 
     def __init__(
         self,
-        analysis_window=600,  # 分析窗口：10分钟
+        analysis_window=1200,  # 分析窗口：20分钟
         doa_outlier_win=5,
         doa_outlier_thr=20.0,
         doa_smooth_win=5,
@@ -883,7 +882,7 @@ class RealtimeClusterAnalyzer:
                 ).astype(np.float32)
 
         valid_mask = ~np.isnan(doa_matrix)
-        valid_int = valid_mask.astype(np.int16)
+        valid_int = valid_mask.astype(np.int8)
         overlap_counts = valid_int @ valid_int.T
 
         idx_arr = np.arange(n_tracks)
@@ -948,7 +947,7 @@ class StreamLineDOAClusterProcessor:
         add_f_lower_bound=False,
         track_match_max_dt=15.0,
         track_match_max_df=1.0,
-        analysis_window=600,
+        analysis_window=1200,
         debug_dir=None
     ):
         self.fs = fs
@@ -1274,14 +1273,14 @@ class StreamLineDOAClusterProcessor:
         time_associate = time.time() - t4
 
         # 6. 保存图像
-        self._append_stream_summary_window(
-            noisy_spec, denoise_spec, trace_img_vis,
-            window_start_time, window_end_time
-        )
+        # self._append_stream_summary_window(
+        #     noisy_spec, denoise_spec, trace_img_vis,
+        #     window_start_time, window_end_time
+        # )
 
         # 7. 保存调试图像
-        if self.debug_dir is not None:
-            self._save_debug_window_image(noisy_spec, denoise_spec, trace_img_vis, window_end_time)
+        # if self.debug_dir is not None:
+        #     self._save_debug_window_image(noisy_spec, denoise_spec, trace_img_vis, window_end_time)
 
         elapsed = time.time() - t0
         print(f"[PROCESS] window=[{window_start_time:.1f},{window_end_time:.1f}) "
@@ -1404,8 +1403,6 @@ class StreamLineDOAClusterProcessor:
                 last_t = track["last_time"]
                 last_f = track["last_freq"]
                 if last_t is None or last_f is None:
-                    continue
-                if not isinstance(last_t, (int, float)) or not isinstance(last_f, (int, float)):
                     continue
                 dt = abs(t0 - last_t)
                 df = abs(f0 - last_f)
@@ -1657,13 +1654,8 @@ class StreamLineDOAClusterProcessor:
 
             # 写入每个簇的详细信息
             for i, cluster in enumerate(analysis_result['clusters'], 1):
-                # 只记录当前周期检出的线谱ID
-                active_ids = [tid for tid in cluster
-                              if self.cluster_analyzer.all_tracks[tid]['t_end']
-                              >= self.current_time - self.process_hop]
-                if len(active_ids) > 0:
-                    track_ids = ','.join(map(str, active_ids))
-                    f.write(f"  cluster_{i},{len(active_ids)},{track_ids}\n")
+                track_ids = ','.join(map(str, cluster))
+                f.write(f"  cluster_{i},{len(cluster)},{track_ids}\n")
 
     def _save_debug_window_image(self, noisy_spec, denoise_spec, trace_img_vis, window_end_time):
         """保存单个窗口的调试图像"""
@@ -1695,7 +1687,7 @@ class StreamLineDOAClusterProcessor:
 
 if __name__ == "__main__":
     # 配置参数
-    device = "cpu"
+    device = "cuda"
     tcp_host = "0.0.0.0"  # 监听所有网卡
     tcp_port = 18888  # TCP服务器端口
 
@@ -1831,32 +1823,33 @@ if __name__ == "__main__":
             return
         all_doa_results.extend(results['doa_results'])
 
-        # 创建时间戳文件夹
-        current_time = processor.current_time
-        time_dir = os.path.join(output_dir, f"t_{current_time:.0f}s")
-        os.makedirs(time_dir, exist_ok=True)
-
         # 保存DOA结果
         with open(output_txt, 'a', encoding='utf-8') as f:
             for r in results['doa_results']:
                 line = f'{int(r["track_id"])},{r["time"]:.2f},{r["freq"]:.2f},{r["doa"]:.2f}\n'
                 f.write(line)
 
-        # 保存矩阵
-        if results['noisy_spec'] is not None:
-            np.savetxt(f"{time_dir}/noisy.txt", results['noisy_spec'], delimiter=',', fmt='%.6f')
-            np.savetxt(f"{time_dir}/denoise.txt", results['denoise_spec'], delimiter=',', fmt='%.6f')
-        if results['doa_matrix'] is not None:
-            np.savetxt(f"{time_dir}/doa.txt", results['doa_matrix'], delimiter=',', fmt='%.6f')
-        if results['time_azimuth'] is not None:
-            np.savetxt(f"{time_dir}/time_azimuth.txt", results['time_azimuth'], delimiter=',', fmt='%.6f')
+        # 创建时间戳文件夹
+        # current_time = processor.current_time
+        # time_dir = os.path.join(output_dir, f"t_{current_time:.0f}s")
+        # os.makedirs(time_dir, exist_ok=True)
 
-        # 保存聚类簇
-        if results['analysis_result'] is not None and results['analysis_result']['cluster_count'] > 0:
-            cluster_file = f"{time_dir}/clusters.txt"
-            with open(cluster_file, 'w', encoding='utf-8') as f:
-                for cluster in results['analysis_result']['clusters']:
-                    f.write(','.join(map(str, cluster)) + '\n')
+
+        # # 保存矩阵
+        # if results['noisy_spec'] is not None:
+        #     np.savetxt(f"{time_dir}/noisy.txt", results['noisy_spec'], delimiter=',', fmt='%.6f')
+        #     np.savetxt(f"{time_dir}/denoise.txt", results['denoise_spec'], delimiter=',', fmt='%.6f')
+        # if results['doa_matrix'] is not None:
+        #     np.savetxt(f"{time_dir}/doa.txt", results['doa_matrix'], delimiter=',', fmt='%.6f')
+        # if results['time_azimuth'] is not None:
+        #     np.savetxt(f"{time_dir}/time_azimuth.txt", results['time_azimuth'], delimiter=',', fmt='%.6f')
+        #
+        # # 保存聚类簇
+        # if results['analysis_result'] is not None and results['analysis_result']['cluster_count'] > 0:
+        #     cluster_file = f"{time_dir}/clusters.txt"
+        #     with open(cluster_file, 'w', encoding='utf-8') as f:
+        #         for cluster in results['analysis_result']['clusters']:
+        #             f.write(','.join(map(str, cluster)) + '\n')
 
     try:
         while True:
@@ -1876,12 +1869,12 @@ if __name__ == "__main__":
         total_elapsed = time.time() - total_start_time
 
         # 保存汇总图
-        summary_png = output_txt.replace(".txt", "_stream_summary.png")
-        processor.save_stream_summary_image(summary_png)
-
-        # 保存累积矩阵
-        accumulated_png = output_txt.replace(".txt", "_accumulated_matrices.png")
-        processor.save_accumulated_matrices_image(accumulated_png)
+        # summary_png = output_txt.replace(".txt", "_stream_summary.png")
+        # processor.save_stream_summary_image(summary_png)
+        #
+        # # 保存累积矩阵
+        # accumulated_png = output_txt.replace(".txt", "_accumulated_matrices.png")
+        # processor.save_accumulated_matrices_image(accumulated_png)
 
         print(f"[INFO] stream processing finished.")
         print(f"[INFO] total processing time: {total_elapsed:.2f}s")
